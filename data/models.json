@@ -3,14 +3,14 @@
     "id": "anna_ivanova",
     "name": "Анна Иванова",
     "height": "175",
-    "measurements": "88-60-90",
     "city": "Москва",
     "category": "fashion",
     "is_available": true,
-    "bio": "Опыт работы 3 года. Участвовала в показах Mercedes-Benz Fashion Week.",
+    "bio": "Профессиональная модель с опытом работы 5 лет.",
     "photos": [
-      "https://avatars.mds.yandex.net/i?id=c08e04b53b6b507fa988cbf017fdf66f_l-5227094-images-thumbs&n=13",
-      "https://avatars.mds.yandex.net/i?id=7c89d31de1259a7682c09e6a1173498d_l-4031265-images-thumbs&n=13"
+      "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=800&h=1000&fit=crop&auto=format",
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&h=1000&fit=crop&auto=format",
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&h=1000&fit=crop&auto=format"
     ]
   },
   {
@@ -20,8 +20,10 @@
     "city": "Санкт-Петербург",
     "category": "commercial",
     "is_available": true,
+    "bio": "Специализация: рекламные съемки.",
     "photos": [
-      "https://avatars.mds.yandex.net/i?id=4d34246a2275de546e52d9727a48046e_l-5238371-images-thumbs&n=13"
+      "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=800&h=1000&fit=crop&auto=format",
+      "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&h=1000&fit=crop&auto=format"
     ]
   },
   {
@@ -31,7 +33,10 @@
     "city": "Новосибирск",
     "category": "fashion",
     "is_available": false,
-    "bio": "Специализация: high fashion",
-    "photos": []
+    "bio": "High fashion, участие в международных показах.",
+    "photos": [
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&h=1000&fit=crop&auto=format",
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&h=1000&fit=crop&auto=format"
+    ]
   }
 ]
