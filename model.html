@@ -512,5 +512,32 @@
             }
         });
     </script>
+    <div style="
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    z-index: 1000;
+    display: none;
+" id="debug-info">
+    <div>ID: <span id="debug-model-id">-</span></div>
+    <div>Всего моделей: <span id="debug-model-count">-</span></div>
+    <div>URL JSON: <span id="debug-json-url">-</span></div>
+</div>
+
+<script>
+// Добавьте в функцию loadModelProfile() после получения данных:
+console.log('Найдены модели:', allModels.map(m => m.id));
+
+// Показываем отладочную информацию
+document.getElementById('debug-model-id').textContent = modelId;
+document.getElementById('debug-model-count').textContent = allModels.length;
+document.getElementById('debug-json-url').textContent = jsonUrl;
+document.getElementById('debug-info').style.display = 'block';
+</script>
 </body>
 </html>
