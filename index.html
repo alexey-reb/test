@@ -4,6 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог моделей</title>
+    /* Добавьте этот код в тег <style> (примерно на 30-й строке) */
+/* ПРЯМО ПОСЛЕ body {} стилей */
+#models-container, #status, .filters, #search {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+body.loading #models-container,
+body.loading #status,
+body.loading .filters,
+body.loading #search {
+    opacity: 0;
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
+}
+
+#preloader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    flex-direction: column;
+}
+
+body:not(.loading) #preloader {
+    display: none;
+}
+
+.loader {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
     <style>
         * {
             box-sizing: border-box;
