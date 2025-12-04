@@ -236,58 +236,80 @@
         
         // Основная функция загрузки
         async function loadModelProfile() {
-            const modelId = getModelIdFromUrl();
-            const loader = document.getElementById('loader');
-            const content = document.getElementById('model-content');
-            const errorContainer = document.getElementById('error-container');
-            
-            if (!modelId) {
-                showError('ID модели не указан в URL');
-                return;
-            }
-            
-            try {
-                // Загружаем данные всех моделей
-                const jsonUrl = window.location.hostname.includes('github.io')
-                    ? `https://raw.githubusercontent.com/${window.location.hostname.split('.')[0]}/models-portfolio/main/data/models.json`
-                    : '../data/models.json';
-                
-                const response = await fetch(jsonUrl);
-                
-                if (!response.ok) {
-                    throw new Error(`Ошибка загрузки данных: ${response.status}`);
-                }
-                
-                const allModels = await response.json();
-                
-                // Ищем нужную модель
-                const model = allModels.find(m => m.id === modelId);
-                
-                if (!model) {
-                    throw new Error(`Модель с ID "${modelId}" не найдена`);
-                }
-                
-                // Обновляем заголовок страницы
-                document.title = `${model.name} - Профиль модели`;
-                document.getElementById('page-title').textContent = model.name;
-                
-                // Генерируем HTML профиля
-                const profileHtml = generateProfileHtml(model);
-                
-                // Показываем контент
-                loader.style.display = 'none';
-                content.innerHTML = profileHtml;
-                content.style.display = 'block';
-                
-                // Инициализируем галерею
-                initGallery(model.photos || []);
-                
-            } catch (error) {
-                console.error('Ошибка:', error);
-                loader.style.display = 'none';
-                showError(error.message);
-            }
+    const modelId = getModelIdFromUrl();
+    const loader = document.getElementById('loader');
+    const content = document.getElementById('model-content');
+    const errorContainer = document.getElementById('error-container');
+    
+    if (!modelId) {
+        showError('ID модели не указан в URL. Пример правильного URL: model.html?id=anna_ivanova');
+        return;
+    }
+    
+    try {
+        // 🚀 ВАЖНО: Исправленный URL к JSON файлу
+        // Определяем путь к JSON в зависимости от того, где находится сайт
+        let jsonUrl;
+        
+        if (window.location.hostname.includes('github.io')) {
+            // Если на GitHub Pages: https://username.github.io/repo-name/
+            const pathParts = window.location.pathname.split('/');
+            const repoName = pathParts[1]; // Первая часть после домена
+            const username = window.location.hostname.split('.')[0];
+            jsonUrl = `https://raw.githubusercontent.com/${username}/${repoName}/main/data/models.json`;
+        } else if (window.location.protocol === 'file:') {
+            // Если открыто локально как файл
+            jsonUrl = 'data/models.json';
+        } else {
+            // Для любого другого хостинга
+            jsonUrl = '../data/models.json';
         }
+        
+        console.log('Загружаю JSON по адресу:', jsonUrl);
+        
+        const response = await fetch(jsonUrl);
+        
+        if (!response.ok) {
+            throw new Error(`Ошибка ${response.status}: Не удалось загрузить данные`);
+        }
+        
+        const allModels = await response.json();
+        
+        // Проверяем, что это массив
+        if (!Array.isArray(allModels)) {
+            throw new Error('Данные должны быть массивом моделей');
+        }
+        
+        // Ищем нужную модель
+        const model = allModels.find(m => m.id === modelId);
+        
+        if (!model) {
+            // Показываем доступные ID для отладки
+            const availableIds = allModels.map(m => m.id).join(', ');
+            throw new Error(`Модель с ID "${modelId}" не найдена. Доступные ID: ${availableIds}`);
+        }
+        
+        // Обновляем заголовок страницы
+        document.title = `${model.name} - Профиль модели`;
+        document.getElementById('page-title').textContent = model.name;
+        
+        // Генерируем HTML профиля
+        const profileHtml = generateProfileHtml(model);
+        
+        // Показываем контент
+        loader.style.display = 'none';
+        content.innerHTML = profileHtml;
+        content.style.display = 'block';
+        
+        // Инициализируем галерею
+        initGallery(model.photos || []);
+        
+    } catch (error) {
+        console.error('Ошибка загрузки профиля:', error);
+        loader.style.display = 'none';
+        showError(error.message);
+    }
+}
         
         // Генерация HTML профиля
         function generateProfileHtml(model) {
