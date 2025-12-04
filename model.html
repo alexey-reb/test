@@ -305,10 +305,21 @@
         initGallery(model.photos || []);
         
     } catch (error) {
-        console.error('Ошибка загрузки профиля:', error);
-        loader.style.display = 'none';
-        showError(error.message);
+    console.error('Полная информация об ошибке:', error);
+    
+    // Загружаем список всех моделей для отладки
+    try {
+        const debugResponse = await fetch(jsonUrl);
+        const allModels = await debugResponse.json();
+        console.log('Все доступные модели:', allModels.map(m => m.id));
+        
+        error.message += `\n\nДоступные ID: ${allModels.map(m => m.id).join(', ')}`;
+    } catch (debugError) {
+        console.log('Не удалось загрузить список моделей для отладки');
     }
+    
+    loader.style.display = 'none';
+    showError(error.message);
 }
         
         // Генерация HTML профиля
