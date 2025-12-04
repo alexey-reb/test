@@ -1,1 +1,21 @@
-
+[
+  {
+    "id": "test_model_1",
+    "name": "Анна Иванова",
+    "height": "175",
+    "city": "Москва",
+    "photos": [
+      "https://yadi.sk/i/abc123photo1",
+      "https://yadi.sk/i/def456photo2"
+    ]
+  },
+  {
+    "id": "test_model_2",
+    "name": "Мария Петрова",
+    "height": "168",
+    "city": "Санкт-Петербург",
+    "photos": [
+      "https://yadi.sk/i/ghi789photo1"
+    ]
+  }
+]
