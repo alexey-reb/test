@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Анна Иванова",
+    "height": "175 см",
+    "photos": [
+      "https://via.placeholder.com/150",
+      "https://via.placeholder.com/150"
+    ]
+  },
+  {
+    "name": "Мария Петрова",
+    "height": "168 см",
+    "photos": [
+      "https://via.placeholder.com/150",
+      "https://via.placeholder.com/150"
+    ]
+  }
+]
