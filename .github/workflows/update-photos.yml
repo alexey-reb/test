@@ -1,7 +1,7 @@
 name: Update Photo Links
 
 on:
-  workflow_dispatch:  # Включает ручной запуск
+  workflow_dispatch:
     inputs:
       photo1:
         description: 'Ссылка на первое фото'
@@ -23,17 +23,27 @@ on:
 jobs:
   update-photos:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Ключевое разрешение!
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0  # Полная история коммитов
+    
+    - name: Setup Git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
     
     - name: Create or update photos file
       run: |
-        # Создаем или обновляем файл с фото
-        cat > PHOTOS.md << EOF
+        # Создаем директорию если нет
+        mkdir -p docs
+        
+        # Создаем файл с фото
+        cat > docs/PHOTOS.md << EOF
         # 📸 Ссылки на фотографии
         
         ## 📍 Информация
@@ -56,29 +66,38 @@ jobs:
         
         ---
         
-        ## 🔧 Техническая информация
-        - Workflow: \`${{ github.workflow }}\`
-        - Запущено: \`${{ github.actor }}\`
-        - Репозиторий: \`${{ github.repository }}\`
-        
-        *Этот файл был сгенерирован автоматически*
+        ## 📊 История обновлений
+        \`\`\`bash
+        Последнее обновление: $(date)
+        Всего фотографий: 2
+        \`\`\`
         EOF
         
-        echo "Файл PHOTOS.md создан/обновлен"
+        echo "Файл docs/PHOTOS.md создан/обновлен"
+        cat docs/PHOTOS.md
     
-    - name: Commit changes
+    - name: Commit and push changes
       run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git add PHOTOS.md
-        git commit -m "📸 Обновление ссылок на фото
-          
-          Добавлены новые ссылки на фото:
-          - ${{ github.event.inputs.description1 }}
-          - ${{ github.event.inputs.description2 }}
-          
-          Дата: $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
-    
-    - name: Push changes
-      run: |
-        git push origin HEAD:${{ github.ref_name }}
+        # Проверяем есть ли изменения
+        if git diff --quiet && git diff --cached --quiet; then
+          echo "Нет изменений для коммита"
+          exit 0
+        fi
+        
+        # Добавляем изменения
+        git add docs/PHOTOS.md
+        
+        # Создаем коммит
+        git commit -m "📸 Обновление фото ссылок
+        
+        Добавлены/обновлены:
+        - ${{ github.event.inputs.description1 }}
+        - ${{ github.event.inputs.description2 }}
+        
+        Дата: $(date '+%Y-%m-%d %H:%M:%S')
+        Workflow: ${{ github.workflow }}"
+        
+        # Пушим изменения
+        git push origin HEAD:${{ github.ref }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
