@@ -6,98 +6,46 @@ on:
       photo1:
         description: 'Ссылка на первое фото'
         required: true
-        default: ''
       photo2:
         description: 'Ссылка на второе фото'
         required: true
-        default: ''
-      description1:
-        description: 'Описание первого фото'
-        required: false
-        default: 'Фото 1'
-      description2:
-        description: 'Описание второго фото'
-        required: false
-        default: 'Фото 2'
 
 jobs:
   update-photos:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write  # Ключевое разрешение!
     
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Полная история коммитов
+        token: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Setup Git
+    - name: Create photos file
       run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        echo "# Фотографии" > PHOTOS.md
+        echo "" >> PHOTOS.md
+        echo "## Фото 1" >> PHOTOS.md
+        echo "![Фото 1](${{ github.event.inputs.photo1 }})" >> PHOTOS.md
+        echo "" >> PHOTOS.md
+        echo "**Ссылка:** [${{ github.event.inputs.photo1 }}](${{ github.event.inputs.photo1 }})" >> PHOTOS.md
+        echo "" >> PHOTOS.md
+        echo "## Фото 2" >> PHOTOS.md
+        echo "![Фото 2](${{ github.event.inputs.photo2 }})" >> PHOTOS.md
+        echo "" >> PHOTOS.md
+        echo "**Ссылка:** [${{ github.event.inputs.photo2 }}](${{ github.event.inputs.photo2 }})" >> PHOTOS.md
+        echo "" >> PHOTOS.md
+        echo "*Обновлено: $(date)*" >> PHOTOS.md
+        
+        cat PHOTOS.md
     
-    - name: Create or update photos file
+    - name: Commit and push
       run: |
-        # Создаем директорию если нет
-        mkdir -p docs
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
         
-        # Создаем файл с фото
-        cat > docs/PHOTOS.md << EOF
-        # 📸 Ссылки на фотографии
+        git add PHOTOS.md
         
-        ## 📍 Информация
-        - **Дата обновления:** $(date '+%Y-%m-%d %H:%M:%S')
-        - **Обновлено через:** GitHub Actions Workflow
+        # Всегда создаем коммит (даже если файл тот же)
+        git commit -m "Обновление ссылок на фото: $(date '+%Y-%m-%d %H:%M')" || true
         
-        ## 🖼️ Фотографии
-        
-        ### ${{ github.event.inputs.description1 }}
-        ![${{ github.event.inputs.description1 }}](${{ github.event.inputs.photo1 }})
-        
-        **Ссылка:** [${{ github.event.inputs.photo1 }}](${{ github.event.inputs.photo1 }})
-        
-        ---
-        
-        ### ${{ github.event.inputs.description2 }}
-        ![${{ github.event.inputs.description2 }}](${{ github.event.inputs.photo2 }})
-        
-        **Ссылка:** [${{ github.event.inputs.photo2 }}](${{ github.event.inputs.photo2 }})
-        
-        ---
-        
-        ## 📊 История обновлений
-        \`\`\`bash
-        Последнее обновление: $(date)
-        Всего фотографий: 2
-        \`\`\`
-        EOF
-        
-        echo "Файл docs/PHOTOS.md создан/обновлен"
-        cat docs/PHOTOS.md
-    
-    - name: Commit and push changes
-      run: |
-        # Проверяем есть ли изменения
-        if git diff --quiet && git diff --cached --quiet; then
-          echo "Нет изменений для коммита"
-          exit 0
-        fi
-        
-        # Добавляем изменения
-        git add docs/PHOTOS.md
-        
-        # Создаем коммит
-        git commit -m "📸 Обновление фото ссылок
-        
-        Добавлены/обновлены:
-        - ${{ github.event.inputs.description1 }}
-        - ${{ github.event.inputs.description2 }}
-        
-        Дата: $(date '+%Y-%m-%d %H:%M:%S')
-        Workflow: ${{ github.workflow }}"
-        
-        # Пушим изменения
-        git push origin HEAD:${{ github.ref }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        git push
