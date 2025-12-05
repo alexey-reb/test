@@ -1,126 +1,26 @@
-name: Sync from Yandex.Disk
+# Файл: .github/workflows/test-sync.yml
+name: Test Yandex Sync
 
-on:
-  workflow_dispatch:  # ТОЛЬКО ручной запуск
-    inputs:
-      folder_url:
-        description: 'Ссылка на папку Яндекс.Диска'
-        required: true
-        default: 'https://disk.yandex.ru/d/Mx014FbR7UGEPg'
+on: workflow_dispatch
 
 jobs:
-  sync:
+  test:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+    - uses: actions/checkout@v4
+    
+    - run: |
+        # Просто обновляем JSON с тестовой моделью
+        echo '[
+          {
+            "id": "test_yandex",
+            "name": "Тест Яндекс Диск",
+            "photos": ["https://picsum.photos/800/1000"]
+          }
+        ]' > data/models.json
         
-    - name: Install dependencies
-      run: pip install requests beautifulsoup4 lxml
-        
-    - name: Sync from Yandex.Disk
-      env:
-        YANDEX_FOLDER: ${{ github.event.inputs.folder_url }}
-      run: |
-        python3 << 'EOF'
-        import requests, json, os, re
-        from bs4 import BeautifulSoup
-        
-        print("🔄 Синхронизация с Яндекс.Диском...")
-        
-        # URL публичной папки
-        yandex_url = "$YANDEX_FOLDER"
-        print(f"📁 Папка Яндекс.Диска: {yandex_url}")
-        
-        # 1. Получаем HTML страницу папки
-        response = requests.get(yandex_url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # 2. Ищем все папки (названия папок = ID моделей)
-        models = []
-        
-        # Ищем ссылки на папки (примерный селектор)
-        folder_links = soup.select('a[href*="/client/"]')
-        
-        for link in folder_links[:10]:  # Ограничим 10 папками
-            folder_name = link.text.strip()
-            if folder_name and '/' not in folder_name and '.' not in folder_name:
-                print(f"📂 Найдена папка: {folder_name}")
-                
-                # Формируем URL папки
-                folder_url = f"{yandex_url}/{folder_name}"
-                
-                # Пытаемся получить фото из папки
-                try:
-                    folder_response = requests.get(folder_url)
-                    folder_soup = BeautifulSoup(folder_response.text, 'html.parser')
-                    
-                    # Ищем фото в папке
-                    photo_links = folder_soup.select('a[href*=".jpg"], a[href*=".png"], a[href*=".jpeg"]')
-                    photos = []
-                    
-                    for photo_link in photo_links[:5]:  # Максимум 5 фото на модель
-                        photo_href = photo_link.get('href', '')
-                        if photo_href and 'yadi.sk' in photo_href:
-                            # Преобразуем в прямую ссылку
-                            direct_link = photo_href.replace('/client/', '/i/')
-                            photos.append(direct_link)
-                    
-                    if photos:
-                        model = {
-                            'id': folder_name.lower().replace(' ', '_'),
-                            'name': folder_name.replace('_', ' ').title(),
-                            'photos': photos[:3]  # Берем первые 3 фото
-                        }
-                        models.append(model)
-                        print(f"   ✅ {len(photos)} фото")
-                    
-                except Exception as e:
-                    print(f"   ❌ Ошибка: {e}")
-        
-        # Если не нашли через парсинг, используем тестовые данные
-        if not models:
-            print("⚠️  Не удалось получить данные, использую тестовые")
-            models = [
-                {
-                    'id': 'yandex_test_1',
-                    'name': 'Тест из Яндекс.Диска',
-                    'photos': ['https://picsum.photos/800/1000']
-                }
-            ]
-        
-        # 3. Сохраняем в JSON
-        print(f"\n📊 Найдено моделей: {len(models)}")
-        
-        with open('data/models.json', 'w', encoding='utf-8') as f:
-            json.dump(models, f, ensure_ascii=False, indent=2)
-        
-        print("✅ Данные сохранены в data/models.json")
-        
-        # 4. Выводим статистику
-        total_photos = sum(len(m['photos']) for m in models)
-        print(f"📸 Всего фото: {total_photos}")
-        
-        for model in models:
-            print(f"   • {model['name']}: {len(model['photos'])} фото")
-        EOF
-        
-    - name: Commit and push
-      run: |
-        git config --global user.name 'GitHub Actions'
-        git config --global user.email 'actions@github.com'
+    - run: |
+        git config user.name "Test Bot"
         git add data/models.json
-        git commit -m "🔄 Синхронизация с Яндекс.Диском" || echo "Нет изменений"
+        git commit -m "Тест синхронизации" || true
         git push
-        
-    - name: Show result
-      run: |
-        echo "🎉 Синхронизация завершена!"
-        echo "👉 Сайт обновится через 1-2 минуты"
-        echo "🔗 Откройте: https://${{ github.repository_owner }}.github.io/models-portfolio/"
